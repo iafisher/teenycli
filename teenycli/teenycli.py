@@ -1,5 +1,4 @@
 import argparse
-import enum
 import os
 import subprocess
 import sys
@@ -9,26 +8,24 @@ from typing import Any, Callable, NoReturn, Optional
 _Handler = Callable[[argparse.Namespace], Any]
 
 
-class Args(enum.Enum):
-    ONE = enum.auto()
-    AT_LEAST_ONE = enum.auto()
-    ZERO_OR_MORE = enum.auto()
-
-
 class ArgP:
     _DISPATCH_NAME = "_teenycli_handler"
+
+    ZERO = "zero"
+    ONE = "one"
+    MANY = "many"
 
     def __init__(
         self,
         *,
-        description: Optional[str] = None,
         version: Optional[str] = None,
         _internal_parser=None,
+        **kwargs,
     ):
         if _internal_parser is not None:
             self.parser = _internal_parser
         else:
-            self.parser = argparse.ArgumentParser(description=description)
+            self.parser = argparse.ArgumentParser(**kwargs)
             self.parser.set_defaults(**{self._DISPATCH_NAME: None})
 
             if version is not None:
@@ -36,41 +33,59 @@ class ArgP:
 
         self.subparsers = None
 
-    def switch(self, name: str, *, help=None, metavar=None) -> None:
-        self.parser.add_argument(name, action="store_true", help=help, metavar=metavar)
-
-    def arg(
+    def add(
         self,
-        name: str,
-        *,
-        n: Args = Args.ONE,
-        required: bool = True,
-        choices=None,
-        type=None,
-        help=None,
-        metavar=None,
+        *names,
+        n: Optional[str] = None,
+        required: Optional[bool] = None,
+        **kwargs,
     ) -> None:
-        if n == Args.ONE:
-            if required:
-                self.parser.add_argument(
-                    name, choices=choices, type=type, help=help, metavar=metavar
-                )
-            else:
-                self.parser.add_argument(name, nargs="?")
-        elif n == Args.AT_LEAST_ONE:
-            self.parser.add_argument(
-                name, nargs="+", choices=choices, type=type, help=help, metavar=metavar
-            )
-        elif n == Args.ZERO_OR_MORE:
-            self.parser.add_argument(
-                name, nargs="*", choices=choices, type=type, help=help, metavar=metavar
-            )
-        else:
+        _assert(len(names) >= 1, "You need to pass at least one name to `add()`.")
+        is_flag = names[0].startswith("-")
+
+        if n == self.ZERO and not is_flag:
             raise TeenyCliError(
-                f"unexpected value of `n` passed to `{self.__class__.__name__}.arg()`: {n!r}"
+                "`arg=ZERO` is invalid for positional arguments. "
+                + "Start the name with a hyphen to make it a flag, "
+                + "or else change `arg` to `ONE` or `MANY`."
             )
 
-    def subcmd(self, name: str, handler: _Handler, *, help=None) -> "ArgP":
+        if n == self.ZERO and required:
+            raise TeenyCliError("`arg=ZERO` and `required=True` are incompatible.")
+
+        if n is None:
+            n = self.ZERO if is_flag else self.ONE
+
+        if required is None:
+            required = not is_flag
+
+        if n == self.ZERO:
+            # argparse won't accept `nargs=None` if `action="store_true"`.
+            self.parser.add_argument(*names, action="store_true", **kwargs)
+            return
+
+        if n == self.MANY:
+            if is_flag:
+                nargs = "+"
+            else:
+                nargs = "+" if required else "*"
+        elif n == self.ONE:
+            if is_flag:
+                nargs = None
+            else:
+                nargs = "?" if required else None
+        else:
+            nargs = None
+
+        if is_flag:
+            self.parser.add_argument(*names, nargs=nargs, required=required, **kwargs)
+        else:
+            # argparse won't accept `required=None` at all for positionals.
+            self.parser.add_argument(*names, nargs=nargs, **kwargs)
+
+    def subcmd(
+        self, name: str, handler: _Handler, *, help: Optional[str] = None
+    ) -> "ArgP":
         if self.subparsers is None:
             self.subparsers = self.parser.add_subparsers(
                 title="subcommands", metavar=""
@@ -79,6 +94,9 @@ class ArgP:
         parser = self.subparsers.add_parser(name, description=help, help=help)  # type: ignore
         parser.set_defaults(**{self._DISPATCH_NAME: handler})
         return ArgP(_internal_parser=parser)
+
+    def parse(self, argv=None) -> argparse.Namespace:
+        return self.parser.parse_args(argv)
 
     def dispatch(self, handler: Optional[_Handler] = None, *, argv=None) -> None:
         args = self.parser.parse_args(argv)
@@ -177,3 +195,8 @@ def _has_color() -> bool:
 
 class TeenyCliError(Exception):
     pass
+
+
+def _assert(cond: bool, message: str) -> None:
+    if not cond:
+        raise TeenyCliError(message)
