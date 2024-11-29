@@ -6,13 +6,14 @@ authors = ["Ian Fisher <ian@iafisher.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.9"
 
 
 [tool.poetry.group.dev.dependencies]
 iprecommit = "^0.5.2"
 flake8 = "^7.1.1"
 mypy = "^1.13.0"
+black = "^24.10.0"
 
 [build-system]
 requires = ["poetry-core"]
