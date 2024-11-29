@@ -1,0 +1,41 @@
+[[pre_commit]]
+name = "NoDoNotCommit"
+cmd = ["iprecommit-no-forbidden-strings", "--paths"]
+
+[[pre_commit]]
+name = "NewlineAtEndOfFile"
+cmd = ["iprecommit-newline-at-eof"]
+
+[[pre_commit]]
+name = "CommonTypos"
+cmd = ["iprecommit-typos", "--paths"]
+
+[[pre_commit]]
+name = "PythonFormat"
+cmd = [".venv/bin/black", "--check"]
+filters = ["*.py"]
+fix_cmd = [".venv/binblack"]
+
+[[pre_commit]]
+name = "PythonTypes"
+cmd = [".venv/bin/mypy"]
+filters = ["*.py"]
+
+[[pre_commit]]
+name = "PythonLint"
+cmd = [".venv/bin/flake8"]
+filters = ["*.py"]
+
+# commit-msg checks
+[[commit_msg]]
+name = "CommitMessageFormat"
+cmd = ["iprecommit-commit-msg-format", "--max-line-length", "72"]
+
+[[commit_msg]]
+name = "CommitMessageTypos"
+cmd = ["iprecommit-typos", "--paths"]
+
+# pre-push checks (run on commit messages)
+[[pre_push]]
+name = "NoDoNotPush"
+cmd = ["iprecommit-no-forbidden-strings", "--strings", "DO NOT PUSH", "--commits"]
