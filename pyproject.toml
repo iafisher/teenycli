@@ -1,19 +1,24 @@
 [tool.poetry]
 name = "tinycli"
 version = "0.1.0"
-description = ""
+description = "A tiny library for building CLIs"
 authors = ["Ian Fisher <ian@iafisher.com>"]
+license = "MIT"
 readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.9"
-
 
 [tool.poetry.group.dev.dependencies]
 iprecommit = "^0.5.2"
 flake8 = "^7.1.1"
 mypy = "^1.13.0"
 black = "^24.10.0"
+
+[project.urls]
+Homepage = "https://github.com/iafisher/tinycli/"
+Repository = "https://github.com/iafisher/tinycli/"
+Issues = "https://github.com/iafisher/tinycli/issues"
 
 [build-system]
 requires = ["poetry-core"]
