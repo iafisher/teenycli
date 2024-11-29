@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "tinycli"
+name = "teenycli"
 version = "0.1.0"
 description = "A tiny library for building CLIs"
 authors = ["Ian Fisher <ian@iafisher.com>"]
@@ -16,9 +16,9 @@ mypy = "^1.13.0"
 black = "^24.10.0"
 
 [project.urls]
-Homepage = "https://github.com/iafisher/tinycli/"
-Repository = "https://github.com/iafisher/tinycli/"
-Issues = "https://github.com/iafisher/tinycli/issues"
+Homepage = "https://github.com/iafisher/teenycli/"
+Repository = "https://github.com/iafisher/teenycli/"
+Issues = "https://github.com/iafisher/teenycli/issues"
 
 [build-system]
 requires = ["poetry-core"]

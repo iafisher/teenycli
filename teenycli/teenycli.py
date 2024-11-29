@@ -16,7 +16,7 @@ class Args(enum.Enum):
 
 
 class ArgP:
-    _DISPATCH_NAME = "_tinycli_handler"
+    _DISPATCH_NAME = "_teenycli_handler"
 
     def __init__(
         self,
@@ -66,7 +66,7 @@ class ArgP:
                 name, nargs="*", choices=choices, type=type, help=help, metavar=metavar
             )
         else:
-            raise TinyCliError(
+            raise TeenyCliError(
                 f"unexpected value of `n` passed to `{self.__class__.__name__}.arg()`: {n!r}"
             )
 
@@ -89,7 +89,7 @@ class ArgP:
                     self.parser.print_help()
                     sys.exit(1)
                 else:
-                    raise TinyCliError(
+                    raise TeenyCliError(
                         f"You need to either pass a handler to `{self.__class__.__name__}.dispatch()`, "
                         + "or register subcommands with `subcmd()`."
                     )
@@ -175,5 +175,5 @@ def _has_color() -> bool:
     return _COLOR
 
 
-class TinyCliError(Exception):
+class TeenyCliError(Exception):
     pass
