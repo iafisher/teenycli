@@ -62,6 +62,23 @@ confirmed = confirm("Do you wish to continue?")
 ## Installation
 You can install TeenyCLI with `pip install teenycli`. But the main point of TeenyCLI is that it is a single Python file that you can put somewhere on your `PYTHONPATH` and then use in one-off scripts without needing to set up a virtual environment or install anything. Or, you can copy `teenycli.py` into your own project and modify and extend it as you like.
 
+## Why not Click?
+[Click](https://click.palletsprojects.com/en/stable/) is a popular library for building command-line applications.
+
+Reasons you might prefer TeenyCLI to Click:
+
+- You don't want to bother with dependency management.
+- You want to copy TeenyCLI into your own project as a small and easy-to-understand starting point.
+- You prefer an `argparse`-style interface to Click's function decorators.
+- You like TeenyCLI's minimal interface and documentation.
+
+Reasons you might prefer Click to TeenyCLI:
+
+- You need Windows support. TeenyCLI has not been tested on Windows. `ArgP` should work, but ANSI colors probably won't.
+- You are writing production code and want to depend on a project that is more mature and battle-tested.
+- You prefer Click's function decorators to an `argparse`-style interface.
+- You need one of the many features that Click supports and TeenyCLI doesn't.
+
 ## API reference
 ### The `ArgP` class
 
