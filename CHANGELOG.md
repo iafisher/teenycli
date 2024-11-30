@@ -1,3 +1,7 @@
+## [0.1.2] - 2024-11-30
+- `ArgP` will raise an exception if you try to add both subcommands and positional arguments to the same parser.
+- `ArgP.subcmd` now takes a `required` parameter (defaulting to `True`) to allow for optional subcommands.
+
 ## [0.1.1] - 2024-11-30
 - `ArgP.switch` and `ArgP.arg` methods replaced by single `ArgP.add` method.
 - `Args` enum replaced by `ArgP.ZERO`, `ArgP.ONE`, and `ArgP.MANY` constants.
