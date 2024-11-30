@@ -1,4 +1,6 @@
 import unittest
+from pathlib import Path
+from typing import List, Tuple
 
 from teenycli import ArgP, TeenyCliError
 
@@ -209,3 +211,44 @@ class TestArgP(unittest.TestCase):
             TeenyCliError, r"`required=True` is incompatible with passing `default`\."
         ):
             ArgP().add("-x", default=0, required=True)
+
+
+class TestReadmeCode(unittest.TestCase):
+    def test_readme(self):
+        readme = (Path(__file__).absolute().parent.parent / "README.md").read_text()
+        code_blocks = extract_python_code_from_markdown(readme)
+        for code_block, expect_exit in code_blocks:
+            if expect_exit:
+                with self.assertRaises(SystemExit):
+                    exec(code_block)
+            else:
+                exec(code_block)
+
+
+def extract_python_code_from_markdown(text: str) -> List[Tuple[str, bool]]:
+    in_block = False
+    next_block_exits = False
+    skip_next_block = False
+    r: List[Tuple[List[str], bool]] = []
+
+    for line in text.splitlines():
+        stripped = line.strip()
+        if in_block:
+            if stripped == "```":
+                in_block = False
+            else:
+                r[-1][0].append(line)
+        else:
+            if stripped == "<!-- readme-test: exits -->":
+                next_block_exits = True
+            elif stripped == "<!-- readme-test: skip -->":
+                skip_next_block = True
+            elif stripped == "```python":
+                if skip_next_block:
+                    skip_next_block = False
+                else:
+                    in_block = True
+                    r.append(([], next_block_exits))
+                    next_block_exits = False
+
+    return [("\n".join(lines), expect_exit) for lines, expect_exit in r]
