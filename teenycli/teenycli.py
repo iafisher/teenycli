@@ -1,5 +1,6 @@
 import argparse
 import os
+import re
 import subprocess
 import sys
 from typing import Any, Callable, NoReturn, Optional
@@ -40,7 +41,9 @@ class ArgP:
         required: Optional[bool] = None,
         **kwargs,
     ) -> "ArgP":
-        _assert(len(names) >= 1, "You need to pass at least one name to `add()`.")
+        if len(names) == 0:
+            raise TeenyCliError("You need to pass at least one name to `add()`.")
+
         is_flag = names[0].startswith("-")
 
         if n == self.ZERO and not is_flag:
@@ -129,6 +132,25 @@ class ArgP:
             return configured_handler(args)
 
 
+_ansi_codes_re = re.compile(r"\033\[[;?0-9]*[a-zA-Z]")
+
+
+def print_(message: str, file=None, **kwargs):
+    not_a_terminal = not _isatty(file if file is not None else sys.stdout)
+    # https://no-color.org/
+    if not_a_terminal or "NO_COLOR" in os.environ:
+        message = _ansi_codes_re.sub(message, "")
+
+    print(message, file=file, **kwargs)
+
+
+def _isatty(stream):
+    try:
+        return stream.isatty()
+    except Exception:
+        return False
+
+
 def confirm(message: str) -> None:
     message = message.rstrip() + " "
 
@@ -177,38 +199,8 @@ def green(s: str) -> str:
 
 
 def _colored(s: str, code: int) -> str:
-    if not _has_color():
-        return s
-
     return f"\033[{code}m{s}\033[0m"
-
-
-# don't access directly; use _has_color() instead
-#
-# once set, this may be reset back to `None` if the module is re-imported elsewhere
-_COLOR = None
-
-
-def _has_color() -> bool:
-    global _COLOR
-
-    if _COLOR is not None:
-        return _COLOR
-
-    _COLOR = not (
-        # https://no-color.org/
-        "NO_COLOR" in os.environ
-        or not os.isatty(sys.stdout.fileno())
-        or not os.isatty(sys.stderr.fileno())
-    )
-
-    return _COLOR
 
 
 class TeenyCliError(Exception):
     pass
-
-
-def _assert(cond: bool, message: str) -> None:
-    if not cond:
-        raise TeenyCliError(message)
