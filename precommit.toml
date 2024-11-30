@@ -14,7 +14,7 @@ cmd = ["iprecommit-typos", "--paths"]
 name = "PythonFormat"
 cmd = [".venv/bin/black", "--check"]
 filters = ["*.py"]
-fix_cmd = [".venv/binblack"]
+fix_cmd = [".venv/bin/black"]
 
 [[pre_commit]]
 name = "PythonTypes"

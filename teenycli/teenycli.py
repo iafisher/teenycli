@@ -39,7 +39,7 @@ class ArgP:
         n: Optional[str] = None,
         required: Optional[bool] = None,
         **kwargs,
-    ) -> None:
+    ) -> "ArgP":
         _assert(len(names) >= 1, "You need to pass at least one name to `add()`.")
         is_flag = names[0].startswith("-")
 
@@ -53,8 +53,19 @@ class ArgP:
         if n == self.ZERO and required:
             raise TeenyCliError("`arg=ZERO` and `required=True` are incompatible.")
 
+        if "default" in kwargs:
+            if required:
+                raise TeenyCliError(
+                    "`required=True` is incompatible with passing `default`."
+                )
+
+            default = kwargs.pop("default")
+            required = False
+        else:
+            default = [] if n == self.MANY else None
+
         if n is None:
-            n = self.ZERO if is_flag else self.ONE
+            n = self.ZERO if is_flag and required is None else self.ONE
 
         if required is None:
             required = not is_flag
@@ -62,26 +73,26 @@ class ArgP:
         if n == self.ZERO:
             # argparse won't accept `nargs=None` if `action="store_true"`.
             self.parser.add_argument(*names, action="store_true", **kwargs)
-            return
+            return self
 
+        nargs: Optional[str]
         if n == self.MANY:
-            if is_flag:
-                nargs = "+"
-            else:
-                nargs = "+" if required else "*"
+            nargs = "+" if is_flag or required else "*"
         elif n == self.ONE:
-            if is_flag:
-                nargs = None
-            else:
-                nargs = "?" if required else None
+            nargs = "?" if not required and not is_flag else None
         else:
             nargs = None
 
+        default = kwargs.pop("default", [] if n == self.MANY else None)
         if is_flag:
-            self.parser.add_argument(*names, nargs=nargs, required=required, **kwargs)
+            self.parser.add_argument(
+                *names, nargs=nargs, required=required, default=default, **kwargs
+            )
         else:
             # argparse won't accept `required=None` at all for positionals.
-            self.parser.add_argument(*names, nargs=nargs, **kwargs)
+            self.parser.add_argument(*names, nargs=nargs, default=default, **kwargs)
+
+        return self
 
     def subcmd(
         self, name: str, handler: _Handler, *, help: Optional[str] = None
@@ -98,8 +109,9 @@ class ArgP:
     def parse(self, argv=None) -> argparse.Namespace:
         return self.parser.parse_args(argv)
 
-    def dispatch(self, handler: Optional[_Handler] = None, *, argv=None) -> None:
+    def dispatch(self, handler: Optional[_Handler] = None, *, argv=None) -> Any:
         args = self.parser.parse_args(argv)
+        print(args)
         configured_handler = getattr(args, self._DISPATCH_NAME)
         if configured_handler is None:
             if handler is None:
@@ -112,9 +124,9 @@ class ArgP:
                         + "or register subcommands with `subcmd()`."
                     )
 
-            handler(args)
+            return handler(args)
         else:
-            configured_handler(args)
+            return configured_handler(args)
 
 
 def confirm(message: str) -> None:

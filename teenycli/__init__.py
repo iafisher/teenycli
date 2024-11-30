@@ -1,1 +1,1 @@
-from .teenycli import ArgP
+from .teenycli import ArgP, TeenyCliError
