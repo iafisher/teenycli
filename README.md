@@ -60,7 +60,7 @@ confirmed = confirm("Do you wish to continue?")
 ```
 
 ## Installation
-You can install TeenyCLI with `pip install teenycli`. But the main point of TeenyCLI is that it is a single Python file that you can put somewhere on your `PYTHONPATH` and then use in one-off scripts without needing to set up a virtual environment or install anything. Or, you can copy `teenycli.py` into your own project and modify and extend it as you like.
+You can install TeenyCLI with `pip install teenycli`. But the main point of TeenyCLI is that it is a single Python file that you can put somewhere on your `PYTHONPATH` and then use in one-off scripts without needing to set up a virtual environment or install anything. Or, you can copy [`teenycli.py`](https://github.com/iafisher/teenycli/blob/master/teenycli/teenycli.py) into your own project and modify and extend it as you like.
 
 ## Why not Click?
 [Click](https://click.palletsprojects.com/en/stable/) is a popular library for building command-line applications.
