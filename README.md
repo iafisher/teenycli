@@ -1,5 +1,7 @@
 A tiny library for building CLIs in Python.
 
+Copy [`teenycli.py`](https://github.com/iafisher/teenycli/blob/master/teenycli/teenycli.py) to your `PYTHONPATH` and use it anywhere.
+
 ## A brief tour
 Command-line argument parsing:
 
@@ -73,11 +75,12 @@ You can install TeenyCLI with `pip install teenycli`. But the main point of Teen
   - The default value of a `ArgP.MANY` argument is the empty list, not `None` as in `argparse`.
   - All other `kwargs` are passed on to `argparse.ArgumentParser.add_argument`.
   - Returns the same `ArgP` instance so that calls can be chained.
-- `ArgP.subcmd(name, handler) -> ArgP`
+- `ArgP.subcmd(name, handler, *, required=True) -> ArgP`
   - Register a subcommand.
   - `handler` is a function that takes in a single `args` parameter, with the argument values as fields on the object (i.e., `args.my_flag`, not `args["my_flag"]`).
   - Returns a new `ArgP` instance for the subcommand.
   - Nested subcommands are supported.
+  - The `required` parameter applies to all subcommands registered on the parent parser, i.e. either the parent parser requires that *some* subcommand be present, or allows there to be no subcommand.
 - `ArgP.dispatch(handler=None, *, argv=None)`
   - Parse arguments and dispatch to the handler function.
   - If you registered subcommands with `ArgP.subcmd`, this method will dispatch to the corresponding subcommand handler. Otherwise, you need to pass in your main handler here.

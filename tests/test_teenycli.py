@@ -134,7 +134,7 @@ class TestArgP(unittest.TestCase):
 
         argp = ArgP()
         argp_outer = argp.subcmd("outer", main_outer)
-        argp_outer.subcmd("inner", main_inner)
+        argp_outer.subcmd("inner", main_inner, required=False)
 
         r = argp.dispatch(argv=["outer", "inner"])
 
@@ -146,6 +146,48 @@ class TestArgP(unittest.TestCase):
 
         with self.assertRaises(SystemExit):
             argp.dispatch(argv=[])
+
+    def test_very_nested_subcmds(self):
+        make_subcmd = lambda name: lambda _: name
+
+        # utils
+        #   date
+        #     range
+        #   math
+        #     add
+        #     sub
+        argp = ArgP()
+        argp_utils = argp.subcmd("utils", make_subcmd("utils"))
+        argp_date = argp_utils.subcmd("date", make_subcmd("date"))
+        argp_date.subcmd("range", make_subcmd("date range"), required=False)
+        argp_math = argp_utils.subcmd("math", make_subcmd("math"))
+        argp_math.subcmd("add", make_subcmd("math add"))
+        argp_math.subcmd("sub", make_subcmd("math sub"))
+
+        r = argp.dispatch(argv=["utils", "date"])
+
+        self.assertEqual("date", r)
+
+        r = argp.dispatch(argv=["utils", "date", "range"])
+
+        self.assertEqual("date range", r)
+
+        r = argp.dispatch(argv=["utils", "math", "add"])
+
+        self.assertEqual("math add", r)
+
+        r = argp.dispatch(argv=["utils", "math", "sub"])
+
+        self.assertEqual("math sub", r)
+
+        with self.assertRaises(SystemExit):
+            argp.dispatch(argv=[])
+
+        with self.assertRaises(SystemExit):
+            argp.dispatch(argv=["utils"])
+
+        with self.assertRaises(SystemExit):
+            argp.dispatch(argv=["utils", "math"])
 
     def test_mini_git(self):
         make_subcmd = lambda name: lambda args: (name, args)
@@ -212,6 +254,33 @@ class TestArgP(unittest.TestCase):
             TeenyCliError, r"`required=True` is incompatible with passing `default`\."
         ):
             ArgP().add("-x", default=0, required=True)
+
+        with self.assertRaisesRegex(
+            TeenyCliError, r"The `required` parameter must be specified exactly once"
+        ):
+            argp = ArgP()
+            argp.subcmd("s1", no_op)
+            argp.subcmd("s2", no_op, required=False)
+
+        with self.assertRaisesRegex(
+            TeenyCliError,
+            r"A parser with subcommands cannot also have positional arguments",
+        ):
+            argp = ArgP()
+            argp.subcmd("subcmd", no_op)
+            argp.add("positional")
+
+        with self.assertRaisesRegex(
+            TeenyCliError,
+            r"A parser with subcommands cannot also have positional arguments",
+        ):
+            argp = ArgP()
+            argp.add("positional")
+            argp.subcmd("subcmd", no_op)
+
+
+def no_op(_) -> None:
+    return None
 
 
 class TestMiscellaneous(unittest.TestCase):

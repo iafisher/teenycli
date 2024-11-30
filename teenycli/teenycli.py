@@ -33,6 +33,7 @@ class ArgP:
                 self.parser.add_argument("--version", action="version", version=version)
 
         self.subparsers = None
+        self.has_positionals = False
 
     def add(
         self,
@@ -55,6 +56,9 @@ class ArgP:
 
         if n == self.ZERO and required:
             raise TeenyCliError("`arg=ZERO` and `required=True` are incompatible.")
+
+        if not is_flag and self.subparsers is not None:
+            self._no_subcommands_and_positionals()
 
         if "default" in kwargs:
             if required:
@@ -94,17 +98,40 @@ class ArgP:
         else:
             # argparse won't accept `required=None` at all for positionals.
             self.parser.add_argument(*names, nargs=nargs, default=default, **kwargs)
+            self.has_positionals = True
 
         return self
 
     def subcmd(
-        self, name: str, handler: _Handler, *, help: Optional[str] = None
+        self,
+        name: str,
+        handler: _Handler,
+        *,
+        help: Optional[str] = None,
+        required: Optional[bool] = None,
     ) -> "ArgP":
+        if self.has_positionals:
+            self._no_subcommands_and_positionals()
+
         if self.subparsers is None:
-            # TODO: how to set `required`` parameter?
             self.subparsers = self.parser.add_subparsers(
-                title="subcommands", metavar=""
+                title="subcommands",
+                metavar="",
+                required=(required if required is not None else True),
             )
+        else:
+            # It's annoying that the API makes it possible. A more explicit API might look like:
+            #
+            #   subcmds = argp.subcmds(required=False)
+            #   subcmds.add("whatever", handler)
+            #
+            # But this is more verbose and introduces a new `subcmds` object. I expect that most
+            # users will want required subcommands, so I chose the more concise API.
+            if required is not None:
+                raise TeenyCliError(
+                    "The `required` parameter must be specified exactly once, "
+                    + "on the first invocation of `subcmd()`."
+                )
 
         parser = self.subparsers.add_parser(name, description=help, help=help)  # type: ignore
         parser.set_defaults(**{self._DISPATCH_NAME: handler})
@@ -129,8 +156,12 @@ class ArgP:
 
             return handler(args)
         else:
-            # TODO: what if `handler` is not None?
             return configured_handler(args)
+
+    def _no_subcommands_and_positionals(self):
+        raise TeenyCliError(
+            "A parser with subcommands cannot also have positional arguments."
+        )
 
 
 _ansi_codes_re = re.compile(r"\033\[[;?0-9]*[a-zA-Z]")
