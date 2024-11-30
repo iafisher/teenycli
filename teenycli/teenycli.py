@@ -151,17 +151,23 @@ def _isatty(stream):
         return False
 
 
-def confirm(message: str) -> None:
+def confirm(message: str) -> bool:
     message = message.rstrip() + " "
 
     while True:
         yesno = input(message).strip().lower()
         if yesno in {"yes", "y"}:
-            return
+            return True
         elif yesno in {"no", "n"}:
-            sys.exit(2)
+            return False
         else:
             continue
+
+
+def confirm_or_bail(message: str, *, exit_code: int = 2) -> None:
+    r = confirm(message)
+    if not r:
+        sys.exit(exit_code)
 
 
 def shell(cmd) -> str:
@@ -170,16 +176,16 @@ def shell(cmd) -> str:
 
 
 def error(msg: str) -> None:
-    print(f"{red('Error')}: {msg}", file=sys.stderr)
+    print_(f"{red('Error')}: {msg}", file=sys.stderr)
 
 
-def bail(msg: str) -> NoReturn:
+def bail(msg: str, *, code: int = 2) -> NoReturn:
     error(msg)
-    sys.exit(1)
+    sys.exit(code)
 
 
 def warn(msg: str) -> None:
-    print(f"{yellow('Warning')}: {msg}", file=sys.stderr)
+    print_(f"{yellow('Warning')}: {msg}", file=sys.stderr)
 
 
 def red(s: str) -> str:
