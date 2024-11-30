@@ -115,7 +115,6 @@ class ArgP:
 
     def dispatch(self, handler: Optional[_Handler] = None, *, argv=None) -> Any:
         args = self.parser.parse_args(argv)
-        print(args)
         configured_handler = getattr(args, self._DISPATCH_NAME)
         if configured_handler is None:
             if handler is None:
@@ -173,7 +172,7 @@ def confirm_or_bail(message: str, *, exit_code: int = 2) -> None:
         sys.exit(exit_code)
 
 
-def shell(cmd, *, shell: bool = False) -> str:
+def run(cmd, *, shell: bool = False) -> str:
     try:
         proc = subprocess.run(
             cmd, stdout=subprocess.PIPE, text=True, check=True, shell=shell

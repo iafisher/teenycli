@@ -2,7 +2,8 @@ import unittest
 from pathlib import Path
 from typing import List, Tuple
 
-from teenycli import ArgP, TeenyCliError, shell
+import teenycli
+from teenycli import ArgP, TeenyCliError
 
 
 class TestArgP(unittest.TestCase):
@@ -214,14 +215,14 @@ class TestArgP(unittest.TestCase):
 
 
 class TestMiscellaneous(unittest.TestCase):
-    def test_shell(self):
-        stdout = shell(["echo", "hello, world!"])
+    def test_run(self):
+        stdout = teenycli.run(["echo", "hello, world!"])
         self.assertEqual("hello, world!\n", stdout)
 
         with self.assertRaisesRegex(
             TeenyCliError, "Command.*returned non-zero exit status"
         ):
-            shell("false", shell=True)
+            teenycli.run("false", shell=True)
 
 
 class TestReadmeCode(unittest.TestCase):

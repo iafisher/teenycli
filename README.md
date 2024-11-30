@@ -78,9 +78,12 @@ You can install TeenyCLI with `pip install teenycli`. But the main point of Teen
   - `handler` is a function that takes in a single `args` parameter, with the argument values as fields on the object (i.e., `args.my_flag`, not `args["my_flag"]`).
   - Returns a new `ArgP` instance for the subcommand.
   - Nested subcommands are supported.
-- `ArgP.dispatch(handler=None)`
+- `ArgP.dispatch(handler=None, *, argv=None)`
   - Parse arguments and dispatch to the handler function.
   - If you registered subcommands with `ArgP.subcmd`, this method will dispatch to the corresponding subcommand handler. Otherwise, you need to pass in your main handler here.
+  - `dispatch` returns whatever your handler function returned.
+- `ArgP.parse(argv=None)`
+  - If you prefer to do dispatch yourself, `parse` will return the parsed arguments without dispatching to a handler.
 
 ### User I/O
 
@@ -107,8 +110,8 @@ Colors should be used with `teenycli.print`, which will intelligently strip out 
 
 ### Miscellaneous
 
-- `shell(cmd, *, shell = False) -> str`
+- `run(cmd, *, shell = False) -> str`
   - Run the command and return standard output as a string.
   - Standard output is decoded to text using the system's default encoding.
   - If the command exits with a non-zero status, `TeenyCliError` is raised.
-  - `cmd` is passed on to `subprocess.run`; it can be a list of strings (recommended) or a single string with `shell=True`.
+  - `cmd` is passed on to `subprocess.run`; it can be a list of strings (recommended) or a single string to be parsed by the shell with `shell=True`.
