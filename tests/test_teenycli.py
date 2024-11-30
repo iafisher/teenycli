@@ -2,7 +2,7 @@ import unittest
 from pathlib import Path
 from typing import List, Tuple
 
-from teenycli import ArgP, TeenyCliError
+from teenycli import ArgP, TeenyCliError, shell
 
 
 class TestArgP(unittest.TestCase):
@@ -211,6 +211,17 @@ class TestArgP(unittest.TestCase):
             TeenyCliError, r"`required=True` is incompatible with passing `default`\."
         ):
             ArgP().add("-x", default=0, required=True)
+
+
+class TestMiscellaneous(unittest.TestCase):
+    def test_shell(self):
+        stdout = shell(["echo", "hello, world!"])
+        self.assertEqual("hello, world!\n", stdout)
+
+        with self.assertRaisesRegex(
+            TeenyCliError, "Command.*returned non-zero exit status"
+        ):
+            shell("false", shell=True)
 
 
 class TestReadmeCode(unittest.TestCase):

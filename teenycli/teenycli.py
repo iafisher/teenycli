@@ -101,6 +101,7 @@ class ArgP:
         self, name: str, handler: _Handler, *, help: Optional[str] = None
     ) -> "ArgP":
         if self.subparsers is None:
+            # TODO: how to set `required`` parameter?
             self.subparsers = self.parser.add_subparsers(
                 title="subcommands", metavar=""
             )
@@ -129,6 +130,7 @@ class ArgP:
 
             return handler(args)
         else:
+            # TODO: what if `handler` is not None?
             return configured_handler(args)
 
 
@@ -161,6 +163,7 @@ def confirm(message: str) -> bool:
         elif yesno in {"no", "n"}:
             return False
         else:
+            print("Please respond 'yes' or 'no'.")
             continue
 
 
@@ -170,9 +173,14 @@ def confirm_or_bail(message: str, *, exit_code: int = 2) -> None:
         sys.exit(exit_code)
 
 
-def shell(cmd) -> str:
-    proc = subprocess.run(cmd, stdout=subprocess.PIPE, text=True, check=True)
-    return proc.stdout
+def shell(cmd, *, shell: bool = False) -> str:
+    try:
+        proc = subprocess.run(
+            cmd, stdout=subprocess.PIPE, text=True, check=True, shell=shell
+        )
+        return proc.stdout
+    except subprocess.CalledProcessError as e:
+        raise TeenyCliError(str(e)) from None
 
 
 def error(msg: str) -> None:
