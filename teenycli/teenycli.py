@@ -248,3 +248,6 @@ def _colored(s: str, code: int) -> str:
 
 class TeenyCliError(Exception):
     pass
+
+
+print = print_
