@@ -95,6 +95,18 @@ class TestArgP(unittest.TestCase):
         with self.assertRaises(SystemExit):
             argp.parse(["a", "b"])
 
+    def test_flag_with_default(self):
+        argp = ArgP()
+        argp.add("--port", default=8000, type=int)
+
+        args = argp.parse([])
+
+        self.assertEqual(8000, args.port)
+
+        args = argp.parse(["--port", "7777"])
+
+        self.assertEqual(7777, args.port)
+
     def test_dispatch(self):
         main = lambda args: args.x
 

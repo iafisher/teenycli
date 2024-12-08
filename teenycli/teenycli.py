@@ -90,7 +90,6 @@ class ArgP:
         else:
             nargs = None
 
-        default = kwargs.pop("default", [] if n == self.MANY else None)
         if is_flag:
             self.parser.add_argument(
                 *names, nargs=nargs, required=required, default=default, **kwargs
