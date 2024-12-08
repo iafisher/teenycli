@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "teenycli"
-version = "0.1.2"
+version = "0.1.3"
 description = "A tiny library for building CLIs"
 authors = ["Ian Fisher <ian@iafisher.com>"]
 license = "MIT"

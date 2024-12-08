@@ -1,3 +1,6 @@
+## [0.1.3] - 2024-12-08
+- `ArgP.add` now handles the `default` parameter correctly.
+
 ## [0.1.2] - 2024-11-30
 - `ArgP` will raise an exception if you try to add both subcommands and positional arguments to the same parser.
 - `ArgP.subcmd` now takes a `required` parameter (defaulting to `True`) to allow for optional subcommands.
